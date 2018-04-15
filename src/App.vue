@@ -1,7 +1,12 @@
 <template>
-  <div id="app">
-    <img class="app-logo" src="./assets/web-logo-pos-circle.svg">
-    <router-view/>
+  <div id="app" class="container">
+    <div class="card">
+      <div class="logo-container">
+        <img class="site-minder-logo" src="./assets/web-logo-pos-circle.svg">
+        <img class="site-minder-text" src="./assets/web-logo-text.svg">
+      </div>
+      <router-view/>
+    </div>
   </div>
 </template>
 
@@ -20,8 +25,17 @@ export default {
   color: #2c3e50;
   margin-top: 60px;
 }
-.app-logo {
-  height: 100px;
-  margin-bottom: 64px;
+.logo-container {
+  margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.site-minder-logo {
+  width: 100px;
+  margin-bottom: 16px;
+}
+.site-minder-text {
+  width: 150px;
 }
 </style>
