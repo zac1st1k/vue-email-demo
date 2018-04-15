@@ -1,13 +1,14 @@
 <template>
-  <form class="email-form" >
+  <form class="email-form" @submit="onSubmit($v)">
     <div class="badge-container">
       <div v-for="(email, index) in recipientEmails" :key='index'
         class="badge badge-info">
-          {{email}}
+        {{email}}
       </div>
     </div>
 
-    <div class="input-group mb-3" v-bind:class="{ 'form-group--error': $v.recipient.$error }">
+    <div id="recipient-input" class="input-group mb-3"
+      v-bind:class="{ 'form-group--error': $v.recipient.$error }">
       <div class="input-group-prepend">
         <span class="input-group-text" id="recipient-addon">
           To
@@ -40,7 +41,27 @@
         v-model.trim="sender"
         @input="$v.sender.$touch()"
         aria-label="sender email address"
-        aria-describedby="sender-addon">
+        aria-describedby="sender-addon"
+        disabled>
+    </div>
+
+    <div class="input-group mb-3" v-bind:class="{ 'form-group--error': $v.subject.$error }">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="subject-addon">
+          Subject
+        </span>
+      </div>
+
+      <input type="text" class="form-control"
+        v-model.trim="subject"
+        @input="$v.subject.$touch()"
+        aria-label="subject email address"
+        aria-describedby="subject-addon">
+    </div>
+
+    <div v-if="$v.subject.$error && $v.subject.$dirty"
+      class="alert alert-danger" role="alert">
+      <span v-if="!$v.subject.maxLength">Please enter no more than 78 characters</span>
     </div>
 
     <div v-if="$v.sender.$dirty"
@@ -49,7 +70,8 @@
       <span v-if="!$v.sender.email">Please enter a valid email address</span>
     </div>
 
-    <div class="input-group" v-bind:class="{ 'form-group--error': $v.body.$error }">
+    <div v-bind:class="{ 'form-group--error': $v.body.$error }"
+      class="input-group body-input" >
       <div class="input-group-prepend">
         <span class="input-group-text">Body</span>
       </div>
@@ -59,11 +81,16 @@
         aria-label="email body">
       </textarea>
     </div>
+
+    <button disabled="$v.$invalid"
+      type="submit" class="btn btn-primary">
+      Send
+    </button>
   </form>
 </template>
 
 <script>
-import { email, required } from 'vuelidate/lib/validators'
+import { email, required, maxLength } from 'vuelidate/lib/validators'
 
 const EMAIL_RE = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 
@@ -74,9 +101,14 @@ export default {
       recipient: '',
       isRecipientTouched: false,
       recipientEmails: [],
-      sender: '',
+      sender: 'zacfirst@gmail.com',
       isSenderTouched: false,
       senderEmails: [],
+      cc: '',
+      ccs: [],
+      bcc: '',
+      bccs: [],
+      subject: '',
       body: ''
     }
   },
@@ -91,6 +123,21 @@ export default {
           $v.recipient.$reset()
         }
       }
+    },
+    onSubmit: function ($v) {
+      const recipients = this.recipientEmails.push(this.recipient)
+      const senders = this.senderEmails.push(this.sender)
+      const ccs = this.ccs.push(this.cc)
+      const bccs = this.bccs.push(this.bcc)
+      console.log('form invalid: ', $v.$invalid)
+      console.log({
+        from: recipients,
+        to: senders,
+        cc: ccs,
+        bccs: bccs,
+        subject: this.subject,
+        body: this.body
+      })
     }
   },
   validations: {
@@ -101,6 +148,15 @@ export default {
     sender: {
       required,
       email
+    },
+    cc: {
+      email
+    },
+    bcc: {
+      email
+    },
+    subject: {
+      maxLength: maxLength(78)
     },
     body: {
       required
@@ -113,8 +169,8 @@ export default {
 .email-form {
   margin: 32px;
 }
-.input-group-text {
-  width: 62px;
+.form-group--error input, .form-group--error .input-group-text {
+  border-color:#f5c6cb;
 }
 .badge-container {
   display: flex;
@@ -122,5 +178,8 @@ export default {
 }
 .badge {
   margin-right: 5px;
+}
+.body-input {
+  margin-bottom: 32px;
 }
 </style>
