@@ -82,9 +82,15 @@
       </textarea>
     </div>
 
-    <button disabled="$v.$invalid"
+    <div v-if="message"
+      class="alert alert-danger submit-message" role="alert">
+      {{message}}
+    </div>
+
+    <button v-bind:disabled="$v.$invalid || isSending"
       type="submit" class="btn btn-primary">
-      Send
+      <span v-if="!isSending">Send</span>
+      <span v-if="isSending">Waiting&hellip;</span>
     </button>
   </form>
 </template>
@@ -109,7 +115,9 @@ export default {
       bcc: '',
       bccs: [],
       subject: '',
-      body: ''
+      body: '',
+      message: '',
+      isSending: false
     }
   },
   methods: {
@@ -125,19 +133,38 @@ export default {
       }
     },
     onSubmit: function ($v) {
+      this.isSending = true
       const recipients = this.recipientEmails.push(this.recipient)
-      const senders = this.senderEmails.push(this.sender)
+      $v.recipient.$reset()
       const ccs = this.ccs.push(this.cc)
+      $v.cc.$reset()
       const bccs = this.bccs.push(this.bcc)
-      console.log('form invalid: ', $v.$invalid)
-      console.log({
-        from: recipients,
-        to: senders,
-        cc: ccs,
-        bccs: bccs,
-        subject: this.subject,
-        body: this.body
+      $v.bcc.$reset()
+
+      fetch('url', {
+        method: 'POST',
+        body: {
+          from: this.sender,
+          to: recipients,
+          cc: ccs,
+          bccs: bccs,
+          subject: this.subject,
+          body: this.body
+        }
       })
+        .then((response) => {
+          if (!response.ok) {
+            throw Error(response.statusText)
+          }
+          return response
+        })
+        .then(() => {
+          this.isSending = false
+        })
+        .catch(() => {
+          this.isSending = false
+          this.message = 'Please try agian later'
+        })
     }
   },
   validations: {
@@ -159,7 +186,6 @@ export default {
       maxLength: maxLength(78)
     },
     body: {
-      required
     }
   }
 }
@@ -174,12 +200,14 @@ export default {
 }
 .badge-container {
   display: flex;
-  margin-bottom: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
 }
 .badge {
   margin-right: 5px;
+  margin-bottom: 5px;
 }
 .body-input {
-  margin-bottom: 32px;
+  margin-bottom: 16px;
 }
 </style>
