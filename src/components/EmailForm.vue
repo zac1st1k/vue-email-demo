@@ -1,34 +1,22 @@
 <template>
   <form class="email-form" @submit="onSubmit($v)">
-    <div class="badge-container">
-      <div v-for="(email, index) in recipientEmails" :key='index'
-        class="badge badge-info">
-        {{email}}
-      </div>
-    </div>
+    <multiple-email-input
+      id="to"
+      v-bind:required="true"
+      v-on:updateEmails="updateRecipientEmails">
+    </multiple-email-input>
 
-    <div id="recipient-input" class="input-group mb-3"
-      v-bind:class="{ 'form-group--error': $v.recipient.$error }">
-      <div class="input-group-prepend">
-        <span class="input-group-text" id="recipient-addon">
-          To
-        </span>
-      </div>
+    <multiple-email-input
+      id="cc"
+      v-bind:required="false"
+      v-on:updateEmails="updateCcEmails">
+    </multiple-email-input>
 
-      <input type="text" class="form-control"
-        v-model.trim="recipient"
-        @keyup="onEmailChange($event, $v)"
-        @change="isRecipientTouched=true"
-        @input="$v.recipient.$touch()"
-        aria-label="recipient email address"
-        aria-describedby="recipient-addon">
-    </div>
-
-    <div v-if="isRecipientTouched && $v.recipient.$error && $v.recipient.$dirty"
-      class="alert alert-danger" role="alert">
-      <span v-if="!$v.recipient.required">Please enter recipient's email address</span>
-      <span v-if="!$v.recipient.email">Please enter a valid email address</span>
-    </div>
+    <multiple-email-input
+      id="bcc"
+      v-bind:required="false"
+      v-on:updateEmails="updateBccEmails">
+    </multiple-email-input>
 
     <div class="input-group mb-3" v-bind:class="{ 'form-group--error': $v.sender.$error }">
       <div class="input-group-prepend">
@@ -97,22 +85,16 @@
 
 <script>
 import { email, required, maxLength } from 'vuelidate/lib/validators'
-
-const EMAIL_RE = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+import MultipleEmailInput from './MultipleEmailInput'
 
 export default {
   name: 'EmailForm',
+  components: { MultipleEmailInput },
   data () {
     return {
-      recipient: '',
-      isRecipientTouched: false,
-      recipientEmails: [],
       sender: 'zacfirst@gmail.com',
-      isSenderTouched: false,
-      senderEmails: [],
-      cc: '',
+      recipientEmails: [],
       ccs: [],
-      bcc: '',
       bccs: [],
       subject: '',
       body: '',
@@ -121,16 +103,14 @@ export default {
     }
   },
   methods: {
-    onEmailChange: function (event, $v) {
-      const value = event.target.value
-      const email = value.substring(0, value.length - 1)
-      if (value.includes(',') || value.includes(';')) {
-        if (EMAIL_RE.test(email)) {
-          this.recipientEmails.push(email)
-          this.recipient = ''
-          $v.recipient.$reset()
-        }
-      }
+    updateRecipientEmails: function (event) {
+      this.recipientEmails = event
+    },
+    updateCcEmails: function (event) {
+      this.ccs = event
+    },
+    updateBccEmails: function (event) {
+      this.bccs = event
     },
     onSubmit: function ($v) {
       this.isSending = true
