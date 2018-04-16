@@ -75,6 +75,11 @@
       {{message}}
     </div>
 
+    <div v-if="isSent"
+      class="alert alert-success submit-message" role="alert">
+      You email has been sent successfully!
+    </div>
+
     <button v-bind:disabled="!recipientEmails.length || $v.$invalid || isSending"
       type="submit" class="btn btn-primary">
       <span v-if="!isSending">Send</span>
@@ -99,7 +104,8 @@ export default {
       subject: '',
       body: '',
       message: '',
-      isSending: false
+      isSending: false,
+      isSent: false
     }
   },
   methods: {
@@ -113,8 +119,8 @@ export default {
       this.bccs = event
     },
     onSubmit: function ($v) {
-      // debugger
       this.isSending = true
+      this.isSent = false
       const body = {
         from: this.sender,
         to: this.recipientEmails,
@@ -123,8 +129,7 @@ export default {
         subject: this.subject,
         body: this.body
       }
-      console.log(body)
-      fetch('url', {
+      fetch('send', {
         method: 'POST',
         body
       })
@@ -136,6 +141,7 @@ export default {
         })
         .then(() => {
           this.isSending = false
+          this.isSent = true
         })
         .catch(() => {
           this.isSending = false
