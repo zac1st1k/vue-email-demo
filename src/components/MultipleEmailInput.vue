@@ -66,7 +66,7 @@ export default {
         if (event.target.value.includes(';')) {
           const emailTrimmed = email.replace(/[;,]/g, '')
           this.emails.push(emailTrimmed)
-          this.recipient = ''
+          this.emailInput = ''
           this.$emit('updateEmails', this.emails)
         } else {
           this.$emit('updateEmails', this.emails.concat([email]))
@@ -80,5 +80,18 @@ export default {
 <style scoped>
 .input-group-text {
   text-transform: capitalize
+}
+.form-group--error input, .form-group--error .input-group-text {
+  border-color:#d20619;
+  color: #d20619;
+}
+.badge-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.badge {
+  margin-right: 5px;
+  margin-bottom: 5px;
 }
 </style>

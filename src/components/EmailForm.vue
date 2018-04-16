@@ -75,7 +75,7 @@
       {{message}}
     </div>
 
-    <button v-bind:disabled="$v.$invalid || isSending"
+    <button v-bind:disabled="!recipientEmails.length || $v.$invalid || isSending"
       type="submit" class="btn btn-primary">
       <span v-if="!isSending">Send</span>
       <span v-if="isSending">Waiting&hellip;</span>
@@ -113,24 +113,20 @@ export default {
       this.bccs = event
     },
     onSubmit: function ($v) {
+      // debugger
       this.isSending = true
-      const recipients = this.recipientEmails.push(this.recipient)
-      $v.recipient.$reset()
-      const ccs = this.ccs.push(this.cc)
-      $v.cc.$reset()
-      const bccs = this.bccs.push(this.bcc)
-      $v.bcc.$reset()
-
+      const body = {
+        from: this.sender,
+        to: this.recipientEmails,
+        cc: this.ccs,
+        bccs: this.bccs,
+        subject: this.subject,
+        body: this.body
+      }
+      console.log(body)
       fetch('url', {
         method: 'POST',
-        body: {
-          from: this.sender,
-          to: recipients,
-          cc: ccs,
-          bccs: bccs,
-          subject: this.subject,
-          body: this.body
-        }
+        body
       })
         .then((response) => {
           if (!response.ok) {
@@ -148,18 +144,8 @@ export default {
     }
   },
   validations: {
-    recipient: {
-      required,
-      email
-    },
     sender: {
       required,
-      email
-    },
-    cc: {
-      email
-    },
-    bcc: {
       email
     },
     subject: {
@@ -174,18 +160,6 @@ export default {
 <style scoped>
 .email-form {
   margin: 32px;
-}
-.form-group--error input, .form-group--error .input-group-text {
-  border-color:#f5c6cb;
-}
-.badge-container {
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-.badge {
-  margin-right: 5px;
-  margin-bottom: 5px;
 }
 .body-input {
   margin-bottom: 16px;
