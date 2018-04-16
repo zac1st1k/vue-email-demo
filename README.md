@@ -1,6 +1,6 @@
 # vue-app
 
-> SiteMinder Test
+> Vue Email App
 
 ## Build Setup
 
