@@ -89,6 +89,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import { email, required, maxLength } from 'vuelidate/lib/validators'
 import MultipleEmailInput from './MultipleEmailInput'
 
@@ -121,7 +122,7 @@ export default {
     onSubmit: function () {
       this.isSending = true
       this.isSent = false
-      const body = {
+      const request = {
         from: this.sender,
         to: this.recipientEmails,
         cc: this.ccs,
@@ -129,19 +130,11 @@ export default {
         subject: this.subject,
         body: this.body
       }
-      fetch('send', {
-        method: 'POST',
-        body
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw Error(response.statusText)
-          }
-          return response
-        })
+      axios.post('http://localhost:8888/send', request)
         .then(() => {
           this.isSending = false
           this.isSent = true
+          this.message = ''
         })
         .catch(() => {
           this.isSending = false
