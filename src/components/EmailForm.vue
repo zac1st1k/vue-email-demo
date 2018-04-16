@@ -118,7 +118,7 @@ export default {
     updateBccEmails: function (event) {
       this.bccs = event
     },
-    onSubmit: function ($v) {
+    onSubmit: function () {
       this.isSending = true
       this.isSent = false
       const body = {
