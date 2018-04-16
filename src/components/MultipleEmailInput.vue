@@ -50,7 +50,7 @@ export default {
     onEmailChange: function (event) {
       const email = event.target.value
       const isValidEmail = EMAIL_RE.test(email)
-      if (!email && this.required) {
+      if (!email && this.required && !this.emails.length) {
         this.error = 'Please enter an email'
         return
       } else {
@@ -63,7 +63,7 @@ export default {
 
       if (isValidEmail) {
         this.error = ''
-        if (event.target.value.includes(';')) {
+        if (event.target.value.indexOf(';') > -1) {
           const emailTrimmed = email.replace(/[;,]/g, '')
           this.emails.push(emailTrimmed)
           this.emailInput = ''
