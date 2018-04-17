@@ -120,6 +120,12 @@ export default {
       this.bccs = event
     },
     onSubmit: function () {
+      // const form = new FormData()
+      // form.append('from', 'Mailgun Sandbox <postmaster@sandbox73985d0f8b4044c987da4d3b27a5e0e0.mailgun.org>')
+      // form.append('to', 'Zhenzhe Xu <zacfirst@gmail.com>')
+      // form.append('subject', 'Hello Zhenzhe Xu')
+      // form.append('text', '111Congratulations Zhenzhe Xu, you just sent an email with Mailgun!  You are truly awesome!')
+
       this.isSending = true
       this.isSent = false
       const request = {
