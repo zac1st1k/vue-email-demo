@@ -23,30 +23,35 @@ const server = http.createServer((request, response) => {
       })
       request.on('end', () => {
         const bodyParsed = JSON.parse(body)
-
-        rp({
-          method: 'post',
-          uri: MAIL_GUN_URL,
-          auth: {
-            username: 'api',
-            password: 'key-3d3b3151cd4bd700d147b3f9f0487d79'
-          },
-          headers: {
-            'Authorization': MAIL_GUN_BASIC_TOKEN
-          },
-          form: {
-            from: bodyParsed.from,
-            to: bodyParsed.to[0],
-            subject: bodyParsed.subject,
-            text: bodyParsed.body
-          }
+        const rqs = []
+        bodyParsed.to.forEach(to => {
+          const promise = rp({
+            method: 'post',
+            uri: MAIL_GUN_URL,
+            auth: {
+              username: 'api',
+              password: 'key-3d3b3151cd4bd700d147b3f9f0487d79'
+            },
+            headers: {
+              'Authorization': MAIL_GUN_BASIC_TOKEN
+            },
+            form: {
+              from: bodyParsed.from,
+              to: to,
+              subject: bodyParsed.subject,
+              text: bodyParsed.body
+            }
+          })
+          rqs.push(promise)
         })
+
+        Promise.all(rqs)
           .then(() => {
             response.end(body)
           })
-          .catch(error => {
+          .catch(() => {
             response.writeHead(500)
-            response.end(error.response)
+            response.end('Internal server error')
           })
       })
     }
